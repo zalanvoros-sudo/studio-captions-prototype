@@ -118,6 +118,7 @@
   .modal .mb p{margin:0 0 8px}
   .modal .mf{display:flex;justify-content:flex-end;gap:12px;padding:16px 28px;background:#f5f5f5;border-radius:0 0 8px 8px;border-top:1px solid #e5e7e9}
   .scrim.m{z-index:70}
+  .toast.plain:before{display:none}
 
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#2d3b45;color:#fff;padding:14px 22px;border-radius:6px;z-index:90;font-size:16px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
   .toast:before{content:"\2713";background:var(--ok);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
@@ -184,7 +185,7 @@ const SEED=[
 ].map((m,i)=>({id:i+1,author:'Me',...m}));
 
 const clone=o=>JSON.parse(JSON.stringify(o));
-const FILTERS={all:'All',with:'With captions',without:'Without captions',unpub:'With unpublished captions'};
+const FILTERS={all:'All',with:'With published captions',without:'Without published captions',unpub:'With unpublished captions'};
 const pubN=m=>m.caps.filter(c=>c.status===P).length;
 const unpubN=m=>m.caps.filter(c=>c.status===U).length;
 
@@ -307,18 +308,17 @@ function renderOverlays(){
     const items=ui.modal.ids.map(id=>media.find(m=>m.id===id));
     const elig=items.filter(m=>unpubN(m)>0);
     const caps=elig.reduce((a,m)=>a+unpubN(m),0);
-    let sub, body;
-    if(items.length===1){
-      sub=esc(items[0].t);
-      body=`<p>${plural(caps,'unpublished caption')} will be published.</p>`;
+    let body;
+    if(ui.modal.mode==='row'){
+      body=`<p>You\u2019re about to publish ${plural(caps,'caption')}.</p>
+        <p>Want to check them first? <button class="linkbtn" data-act="reviewCaptions" data-id="${items[0].id}">Review captions</button></p>`;
     } else {
-      sub=`${items.length} media selected`;
-      body=`<p>${plural(caps,'unpublished caption')} across ${plural(elig.length,'media','media')} will be published.</p>`;
+      body=`<p>You\u2019re about to publish ${plural(caps,'caption')} across ${plural(elig.length,'media item')}.</p>`;
     }
     h+=`<div class="scrim m" data-act="closeModal"></div>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
       <h2 id="mt">Publish captions</h2>
-      <div class="mb"><p class="sub">${sub}</p>${body}</div>
+      <div class="mb">${body}</div>
       <div class="mf"><button class="btn" data-act="closeModal">Cancel</button><button class="btn primary" data-act="confirmPublish" id="confirmBtn">Publish captions</button></div>
     </div>`;
   }
@@ -366,9 +366,9 @@ function renderMenus(){
   }
 }
 
-function toast(msg){
+function toast(msg,plain){
   const host=document.getElementById('toastHost');
-  host.innerHTML=`<div class="toast">${msg}</div>`;
+  host.innerHTML=`<div class="toast${plain?' plain':''}">${msg}</div>`;
   clearTimeout(toastTimer); toastTimer=setTimeout(()=>host.innerHTML='',4500);
 }
 
@@ -391,9 +391,10 @@ document.addEventListener('click',e=>{
       case 'applyFilter': filter=draft; ui.tray=false; selected.clear(); return render();
       case 'clearFilter': filter='all'; selected.clear(); return render();
       case 'deselectAll': selected.clear(); ui.bulkMenu=false; return render();
-      case 'bulkPublish': ui.modal={ids:[...selected]}; ui.bulkMenu=false; break;
-      case 'rowPublish': ui.modal={ids:[+a.dataset.id]}; ui.rowMenu=null; break;
+      case 'bulkPublish': ui.modal={mode:'bulk',ids:[...selected]}; ui.bulkMenu=false; break;
+      case 'rowPublish': ui.modal={mode:'row',ids:[+a.dataset.id]}; ui.rowMenu=null; break;
       case 'closeModal': ui.modal=null; break;
+      case 'reviewCaptions': { const m=media.find(x=>x.id===+a.dataset.id); ui.modal=null; toast(`Prototype: this would open Manage captions for \u201c${esc(m.t)}\u201d.`,true); break; }
       case 'confirmPublish': return confirmPublish();
     }
     return renderOverlaysOnly();
