@@ -1,4 +1,8 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Studio My Library Prototype</title>
 <style>
   :root{
@@ -9,7 +13,7 @@
   html,body{height:100%;margin:0}
   body{font-family:Lato,"Helvetica Neue",Arial,sans-serif;color:var(--ink);background:var(--bg);font-size:16px}
   button{font:inherit;color:inherit;cursor:pointer}
-  .app{display:flex;height:100%;min-width:1100px}
+  .app{display:flex;height:100%}
 
   /* global nav */
   .gnav{width:84px;background:var(--nav);color:var(--nav-text);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:4px;flex:none;overflow:hidden}
@@ -73,7 +77,7 @@
   .viewbtns button:first-child{border-radius:4px 0 0 4px}.viewbtns button:last-child{border-radius:0 4px 4px 0}
 
   table{width:100%;border-collapse:collapse}
-  th{text-align:left;font-weight:700;padding:14px 10px;font-size:17px;white-space:nowrap}
+  th{text-align:left;font-weight:700;padding:14px 10px;font-size:17px}
   td{padding:14px 10px;border-top:1px solid #c7cdd1;font-size:17px;vertical-align:middle}
   tr.row.checked td{background:#f1f7fb}
   td.title a{color:var(--blue);text-decoration:none}
@@ -89,6 +93,21 @@
   .kebab:hover{background:#eceeef}
   .state{font-size:13px;color:var(--muted);white-space:nowrap}
   .state b{color:#a15c00;font-weight:700}
+  .selwrap .selsum{white-space:nowrap}
+  .selwrap .linkbtn{font-size:14px;white-space:nowrap}
+  .btn.icon[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.icon[disabled]:hover{background:#f5f5f5}
+  .sortbtn{border:0;background:none;font:inherit;font-weight:700;padding:0;color:inherit;cursor:pointer;white-space:nowrap}
+  .sortbtn:hover{text-decoration:underline}
+  .pager{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:20px;padding-top:16px;border-top:1px solid #c7cdd1;font-size:15px}
+  .pager .pinfo{color:var(--muted)}
+  .pager .pbtns{display:flex;align-items:center;gap:6px}
+  .pager button{min-width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:4px;padding:0 10px;font:inherit;display:inline-flex;align-items:center;justify-content:center;gap:4px;color:var(--ink)}
+  .pager button:hover:not([disabled]):not([aria-current]){background:#eceeef}
+  .pager button[aria-current]{background:var(--ink);border-color:var(--ink);color:#fff;font-weight:700;cursor:default}
+  .pager button[disabled]{opacity:.45;cursor:not-allowed}
+  .pager .rot{transform:rotate(180deg)}
+  .pager .ic{width:16px;height:16px}
   .protoopt{font-size:13px;font-weight:400;color:var(--muted);display:flex;align-items:center;gap:6px}
   .protoopt input{width:16px;height:16px}
   .empty{padding:48px 0;text-align:center;color:var(--muted);border-top:1px solid #c7cdd1}
@@ -129,9 +148,66 @@
 
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#2d3b45;color:#fff;padding:14px 22px;border-radius:6px;z-index:90;font-size:16px;display:flex;gap:10px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3)}
   .toast:before{content:"\2713";background:var(--ok);border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  /* ---- responsive (collapse tree, then stacked list) ---- */
+  .collbar,.mobsort,.mselall,.hamb{display:none}
+  .collbar{width:100%;border:0;background:var(--sel);color:#fff;border-radius:4px;height:52px;align-items:center;gap:12px;padding:0 14px;font-size:17px;font-weight:700;text-align:left}
+  .collbar .grow{flex:1}
+  .collbar .ic{width:22px;height:22px}
+  .selwrap{flex-wrap:wrap;row-gap:8px}
+  .subbar{flex-wrap:wrap;gap:12px}
+  .drawer{position:fixed;top:0;left:0;bottom:0;width:340px;max-width:86vw;background:#fff;z-index:61;display:flex;flex-direction:column;box-shadow:4px 0 18px rgba(0,0,0,.2)}
+  .drawer header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid #e5e7e9}
+  .drawer header h2{margin:0;font-size:22px}
+  .drawer .x{border:0;background:none;font-size:24px;line-height:1;padding:6px 10px}
+  .drawer .dbody{padding:16px 20px;overflow:auto}
+  @media (max-width:900px){
+    .side{display:none}
+    .cols{flex-direction:column;gap:16px}
+    .collbar{display:flex}
+    .crumb>span:first-child{display:none}
+    .crumb{justify-content:flex-end}
+    .page{padding-top:0}
+    .head{padding-top:24px}
+    .subbar{position:sticky;top:0;z-index:20;background:var(--bg);margin:12px 0 0;padding:10px 0;border-bottom:1px solid #e5e7e9}
+  }
+  @media (min-width:901px){ .drawer,.scrim.d{display:none} }
+  @media (max-width:767px){
+    .gnav{display:none}
+    .hamb{display:inline-flex;border:0;background:none;padding:6px;margin-right:-8px}
+    .hamb .ic{width:26px;height:26px;margin:0}
+    .topnav{padding:0 16px;gap:20px}
+    .pager{flex-direction:column;align-items:flex-start}
+  }
+  @media (max-width:640px){
+    .page{padding:0 16px 32px}
+    .head{padding-top:16px}
+    h1{font-size:30px}
+    .head{flex-wrap:wrap;gap:12px}
+    .mobsort{display:flex;flex-direction:column;gap:6px;margin-top:16px;font-weight:700}
+    .mselall{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #c7cdd1;font-size:16px}
+    table,thead,tbody,tr.row,td{display:block}
+    thead{display:none}
+    tr.row{padding:12px 0;border-top:1px solid #c7cdd1}
+    tr.row.checked{background:#f1f7fb}
+    tr.row.checked td{background:none}
+    td{border:0;padding:6px 0}
+    td::before{content:attr(data-label);display:block;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:2px}
+    td[data-label=""]::before{display:none}
+    td:empty{display:none}
+    td.title a{font-size:18px}
+    .pager .pnum:not([aria-current]),.pager .plabel{display:none}
+    .tray{width:100%;max-width:100vw}
+  }
+  @media (max-width:480px){
+    /* only the selection controls stay pinned; grid/list toggle scrolls with the results */
+    .subbar{display:contents}
+    .selwrap{position:sticky;top:0;z-index:20;background:var(--bg);margin:12px 0 0;padding:10px 0;border-bottom:1px solid #e5e7e9}
+    .viewbtns{justify-content:flex-end;margin:10px 0 0}
+  }
   .app{overflow:auto}
 </style>
-
+</head>
+<body>
 <div class="app">
   <nav class="gnav" aria-label="Global">
     <div class="logo"></div>
@@ -149,6 +225,7 @@
   </nav>
   <div class="main">
     <div class="topnav">
+      <button class="hamb" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
       <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3.5" width="16" height="12" rx="1.5"/><path d="M10.5 7l3.5 2.5-3.5 2.5z"/><path d="M12 15.5V19M8 19h8"/></svg>
       <a href="#" class="on">My Library</a>
       <a href="#">Admin &#8964;</a>
@@ -189,7 +266,27 @@ const SEED=[
   {t:'Chemistry Demo: Reactions',size:'55 MB',date:'Sep 12, 2026',dur:'10:11',caps:[T('English',P),T('Spanish',U),T('German',U)]},
   {t:'Mindfulness Minute',size:'6 MB',date:'Sep 10, 2026',dur:'1:00',caps:[T('English',P),T('English (AU)',U)]},
   {t:'Podcast Episode 12',size:'38 MB',date:'Sep 8, 2026',dur:'28:47',caps:[T('English',P),T('Spanish',P),T('French',U)]},
-].map((m,i)=>({id:i+1,author:'Me',...m}));
+];
+// extend to 100 items (5 pages of 20): generated items cycle through all four caption states
+const TOPICS=['Intro to Genetics','Reading Graphs','Ecosystems at Work','Medieval Trade Routes','Writing a Thesis','Newton\u2019s Laws','Budgeting Basics','Sound and Waves','The French Revolution','Cell Respiration','Digital Citizenship','Geometry Proofs','Plate Tectonics','Public Speaking','Color Theory','Music Rhythm Basics','Nutrition Labels','Lab Notebook Habits','Ancient Egypt','Data Privacy Basics'];
+const LANGS=['English','Spanish','French','German','Portuguese','Japanese'];
+const MONTHS={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+const DAY=86400000;
+SEED.forEach(m=>{ const [mo,d,y]=m.date.replace(',','').split(' '); m.ts=Date.UTC(+y,MONTHS[mo],+d); });
+const fmtDate=ts=>new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',timeZone:'UTC'});
+for(let i=0;i<80;i++){
+  const k=(i+(i>>2))%4;               // 0 none, 1 published only, 2 unpublished only, 3 both
+  const caps=[]; const lg=j=>LANGS[(i+j)%LANGS.length];
+  if(k===1||k===3){ caps.push(T(lg(0),P)); if(i%5===0) caps.push(T(lg(1),P)); }
+  if(k===2||k===3){ const n=1+(i%3===0?1:0)+(i%7===0?1:0)+(k===3&&i%4===0?1:0); for(let j=0;j<n;j++) caps.push(T(lg(j+2),U)); }
+  const ts=Date.UTC(2026,8,7)-Math.round(i*1.4*DAY);
+  const mins=2+((i*7)%31), secs=(i*13)%60;
+  const item={t:TOPICS[i%20]+', Part '+(Math.floor(i/20)+1),date:fmtDate(ts),ts,dur:mins+':'+String(secs).padStart(2,'0'),caps};
+  if(i%9===4) item.yt=1; else item.size=(5+((i*37)%120))+' MB';
+  SEED.push(item);
+}
+SEED.forEach((m,i)=>{ m.id=i+1; m.author='Me'; });
+const PAGE=20;
 
 const IC={"search": "<circle cx=\"11\" cy=\"11\" r=\"6.5\"/><path d=\"M16 16l5 5\"/>", "filter": "<path d=\"M3 5h18l-7 8.5V20l-4-2v-4.5z\"/>", "reset": "<path d=\"M4 4v5h5\"/><path d=\"M4.6 14a8 8 0 1 0 1.2-6.2L4 9\"/>", "access": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"7.8\" r=\"1\"/><path d=\"M7.5 10.5l4.5.8 4.5-.8M12 11.3v3.2M12 14.5l-2 4M12 14.5l2 4\"/>", "trash": "<path d=\"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c0-4.5 3.5-7 8-7s8 2.5 8 7z\"/>", "users": "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5z\"/><path d=\"M15.5 4.8a3 3 0 0 1 0 6.4M18 14.8c2 .6 3.5 2.3 3.5 5.2\"/>", "course": "<rect x=\"7\" y=\"3\" width=\"13\" height=\"14\" rx=\"1\"/><path d=\"M4 7v14h13\"/>", "archive": "<path d=\"M3 13l2-8h14l2 8v6H3z\"/><path d=\"M3 13h5l1 3h6l1-3h5\"/>", "eye": "<path d=\"M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/>", "chev": "<path d=\"M9 6l6 6-6 6\"/>", "kebab": "<circle cx=\"12\" cy=\"5\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"19\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/>", "grid": "<rect x=\"4\" y=\"4\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"13.5\" y=\"4\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"4\" y=\"13.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/><rect x=\"13.5\" y=\"13.5\" width=\"6.5\" height=\"6.5\" rx=\"1\"/>", "list": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"7\" rx=\"1\"/><rect x=\"4\" y=\"13\" width=\"16\" height=\"7\" rx=\"1\"/>", "move": "<path d=\"M20 9H9a5 5 0 0 0-5 5v5\"/><path d=\"M16 5l4 4-4 4\"/>", "tag": "<path d=\"M3 12V4h8l10 10-8 8z\"/><circle cx=\"7.5\" cy=\"8.5\" r=\"1.3\"/>", "publish": "<rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"17\" rx=\"3\"/><path d=\"M8 12.2l3 3 5-6\"/>", "shield": "<path d=\"M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z\"/><path d=\"M9 12l2 2 4-4\"/>", "gauge": "<path d=\"M3.5 17a9 9 0 1 1 17 0\"/><path d=\"M12 14l4-5\"/>", "book": "<rect x=\"5\" y=\"3\" width=\"14\" height=\"18\" rx=\"1.5\"/><path d=\"M9 8h6M9 12h6\"/>", "cal": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"15\" rx=\"1.5\"/><path d=\"M3.5 10h17M8 3v4M16 3v4\"/>", "inbox": "<path d=\"M4 13l2-8h12l2 8v6H4z\"/><path d=\"M4 13h5l1 2h4l1-2h5\"/>", "clock": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/>", "link": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M8.5 13.5l7-3\"/><path d=\"M13 9l3 1.5-1.5 3\"/>", "studio": "<rect x=\"4\" y=\"3.5\" width=\"16\" height=\"12\" rx=\"1.5\"/><path d=\"M10.5 7l3.5 2.5-3.5 2.5z\"/><path d=\"M12 15.5V19M8 19h8\"/>", "help": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01\"/>"};
 const ic=n=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
@@ -199,20 +296,30 @@ const pubN=m=>m.caps.filter(c=>c.status===P).length;
 const unpubN=m=>m.caps.filter(c=>c.status===U).length;
 
 /* ---------- state ---------- */
-let media, selected, filter, draft, ui, showState=false, toastTimer;
+let media, selected, filter, draft, ui, page, sort, showState=false, toastTimer;
 function resetAll(){
-  media=clone(SEED); selected=new Set(); filter='all'; draft='all';
-  ui={tray:false, bulkMenu:false, rowMenu:null, modal:null};
+  media=clone(SEED); selected=new Set(); filter='all'; draft='all'; page=1; sort={key:'date',dir:'desc'};
+  ui={tray:false, bulkMenu:false, rowMenu:null, modal:null, drawer:false};
   clearTimeout(toastTimer); document.getElementById('toastHost').innerHTML='';
   render();
 }
 function visible(){
-  return media.filter(m=>{
+  const list=media.filter(m=>{
     if(filter==='with') return pubN(m)>0;
     if(filter==='without') return pubN(m)===0;
     if(filter==='unpub') return unpubN(m)>0;
     return true;
   });
+  const d=sort.dir==='asc'?1:-1;
+  return list.sort((a,b)=>{
+    const c=sort.key==='title'?a.t.localeCompare(b.t):a.ts-b.ts;
+    return (c||a.id-b.id)*d;
+  });
+}
+function view(){
+  const all=visible(); const total=all.length;
+  const pages=Math.max(1,Math.ceil(total/PAGE)); page=Math.min(Math.max(1,page),pages);
+  return {all,total,pages,rows:all.slice((page-1)*PAGE,page*PAGE)};
 }
 const plural=(n,s,p)=>n+' '+(n===1?s:p||s+'s');
 
@@ -220,10 +327,19 @@ const plural=(n,s,p)=>n+' '+(n===1?s:p||s+'s');
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 function render(){
-  const rows=visible();
-  selected=new Set([...selected].filter(id=>rows.some(m=>m.id===id)));
-  const allOn=rows.length>0 && rows.every(m=>selected.has(m.id));
-  const some=selected.size>0 && !allOn;
+  const {total,pages,rows}=view();
+  const onPage=rows.filter(m=>selected.has(m.id)).length;
+  const allOn=rows.length>0 && onPage===rows.length;
+  const some=onPage>0 && !allOn;
+  const N=selected.size;
+  let label, action='';
+  const clearBtn='<button class="linkbtn" data-act="clearSelection">Clear selection</button>';
+  if(N===0) label='Selected: 0';
+  else if(N===total && total>PAGE){ label=`All ${total} results selected`; action=clearBtn; }
+  else if(onPage===N){ label=`${N} selected on this page`; if(allOn && total>N) action=`<button class="linkbtn" data-act="selectAllResults">Select all ${total} results</button>`; }
+  else { label=`${N} selected across pages`; action=clearBtn; }
+  const arrow=k=>sort.key===k?(sort.dir==='asc'?'&#9652;':'&#9662;'):'&#8645;';
+  const start=total?(page-1)*PAGE+1:0, end=Math.min(total,page*PAGE);
 
   document.getElementById('page').innerHTML=`
     <div class="head">
@@ -241,7 +357,59 @@ function render(){
       <button class="linkbtn" data-act="clearFilter"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>Clear Filters</button>
     </div>`:''}
     <div class="cols">
-      <aside class="side">
+      <button class="collbar" data-act="openDrawer" aria-label="Open collections"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg><span class="grow">My Library</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+      <aside class="side">${sideInner()}</aside>
+      <section class="content">
+        <div class="crumb"><span>My Library</span><label class="protoopt"><input type="checkbox" id="stateToggle" ${showState?'checked':''}> Prototype only: show caption state column</label></div>
+        <label class="mobsort">Sort by
+          <select class="sel" id="mobSort" aria-label="Sort by">
+            ${[['date:desc','Upload Date (newest first)'],['date:asc','Upload Date (oldest first)'],['title:asc','Title (A\u2013Z)'],['title:desc','Title (Z\u2013A)']].map(([v,l])=>`<option value="${v}" ${sort.key+':'+sort.dir===v?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </label>
+        <div class="subbar">
+          <div class="selwrap">
+            <span class="selsum" id="selSummary" aria-live="polite">${label}</span>
+            ${action}
+            <button class="btn icon" id="bulkBtn" aria-label="Bulk actions" aria-haspopup="menu" aria-expanded="${ui.bulkMenu}" ${N?'':'disabled'}>${ic('kebab')}</button>
+          </div>
+          <div class="viewbtns"><button aria-label="Grid view"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg></button><button class="on" aria-label="List view"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="1"/><rect x="4" y="13" width="16" height="7" rx="1"/></svg></button></div>
+        </div>
+        <label class="mselall"><input type="checkbox" id="selAllM" ${allOn?'checked':''}> Select all on this page</label>
+        <table>
+          <thead><tr>
+            <th style="width:44px"><input type="checkbox" id="selAll" aria-label="Select all" ${allOn?'checked':''}></th>
+            <th><button class="sortbtn" data-sort="title">Title ${arrow('title')}</button></th><th></th><th>Size &#8645;</th><th><button class="sortbtn" data-sort="date">Upload Date ${arrow('date')}</button></th><th>Author &#8645;</th><th>Duration</th>
+            ${showState?'<th>Captions (proto)</th>':''}<th>Actions</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(m=>`
+              <tr class="row ${selected.has(m.id)?'checked':''}">
+                <td data-label=""><input type="checkbox" data-id="${m.id}" aria-label="Select ${esc(m.t)}" ${selected.has(m.id)?'checked':''}></td>
+                <td class="title" data-label="Title"><a href="#" onclick="return false">${esc(m.t)}</a></td>
+                <td data-label="">${pubN(m)>0?'<span class="cc" title="Has published captions">CC</span>':''}</td>
+                <td data-label="Size">${m.yt?'<span class="yt" title="YouTube"></span>':m.size}</td>
+                <td data-label="Upload Date">${m.date}</td><td data-label="Author">${m.author}</td><td data-label="Duration">${m.dur}</td>
+                ${showState?`<td class="state" data-label="Captions (proto)">${pubN(m)} published${unpubN(m)?` &middot; <b>${unpubN(m)} unpublished</b>`:''}</td>`:''}
+                <td data-label="Actions"><button class="kebab" data-row="${m.id}" aria-label="Actions for ${esc(m.t)}" aria-haspopup="menu">${ic('kebab')}</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+        ${rows.length===0?'<div class="empty">No media match this filter.</div>':''}
+        ${total>0?`<nav class="pager" aria-label="Pagination">
+          <span class="pinfo">${start}\u2013${end} of ${total}</span>
+          <div class="pbtns">
+            <button data-page="${page-1}" ${page===1?'disabled':''} aria-label="Previous page">${ic('chev').replace('class="ic"','class="ic rot"')}<span class="plabel">Previous</span></button>
+            ${Array.from({length:pages},(_,i)=>i+1).map(n=>`<button class="pnum" data-page="${n}" ${n===page?'aria-current="page"':''} aria-label="Page ${n}">${n}</button>`).join('')}
+            <button data-page="${page+1}" ${page===pages?'disabled':''} aria-label="Next page"><span class="plabel">Next</span>${ic('chev')}</button>
+          </div>
+        </nav>`:''}
+      </section>
+    </div>`;
+  ['selAll','selAllM'].forEach(i=>{const e=document.getElementById(i); if(e) e.indeterminate=some;});
+  renderOverlays();
+}
+
+function sideInner(){ return `
         <h3>Sort Collections by</h3>
         <select class="sel" aria-label="Sort collections"><option>Date: Most recent on top</option></select>
         <div class="tree">
@@ -250,44 +418,17 @@ function render(){
           <div class="node"><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span style="display:flex;align-items:center;gap:10px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="13" height="14" rx="1"/><path d="M4 7v14h13"/></svg>Course Collections</span><span class="eye"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span></div>
           <div class="node"><svg class="ic chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span style="display:flex;align-items:center;gap:10px"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13l2-8h14l2 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/></svg>Archive</span></div>
         </div>
-      </aside>
-      <section class="content">
-        <div class="crumb"><span>My Library</span><label class="protoopt"><input type="checkbox" id="stateToggle" ${showState?'checked':''}> Prototype only: show caption state column</label></div>
-        <div class="subbar">
-          <div class="selwrap">
-            <span>Selected: <span id="selCount">${selected.size}</span></span>
-            <button class="btn icon" id="bulkBtn" aria-label="Bulk actions" aria-haspopup="menu" aria-expanded="${ui.bulkMenu}">${ic('kebab')}</button>
-          </div>
-          <div class="viewbtns"><button aria-label="Grid view"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1"/></svg></button><button class="on" aria-label="List view"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="7" rx="1"/><rect x="4" y="13" width="16" height="7" rx="1"/></svg></button></div>
-        </div>
-        <table>
-          <thead><tr>
-            <th style="width:44px"><input type="checkbox" id="selAll" aria-label="Select all" ${allOn?'checked':''}></th>
-            <th>Title &#8645;</th><th></th><th>Size &#8645;</th><th>Upload Date &#9662;</th><th>Author &#8645;</th><th>Duration</th>
-            ${showState?'<th>Captions (proto)</th>':''}<th>Actions</th>
-          </tr></thead>
-          <tbody>
-            ${rows.map(m=>`
-              <tr class="row ${selected.has(m.id)?'checked':''}">
-                <td><input type="checkbox" data-id="${m.id}" aria-label="Select ${esc(m.t)}" ${selected.has(m.id)?'checked':''}></td>
-                <td class="title"><a href="#" onclick="return false">${esc(m.t)}</a></td>
-                <td>${pubN(m)>0?'<span class="cc" title="Has published captions">CC</span>':''}</td>
-                <td>${m.yt?'<span class="yt" title="YouTube"></span>':m.size}</td>
-                <td>${m.date}</td><td>${m.author}</td><td>${m.dur}</td>
-                ${showState?`<td class="state">${pubN(m)} published${unpubN(m)?` &middot; <b>${unpubN(m)} unpublished</b>`:''}</td>`:''}
-                <td><button class="kebab" data-row="${m.id}" aria-label="Actions for ${esc(m.t)}" aria-haspopup="menu">${ic('kebab')}</button></td>
-              </tr>`).join('')}
-          </tbody>
-        </table>
-        ${rows.length===0?'<div class="empty">No media match this filter.</div>':''}
-      </section>
-    </div>`;
-  const sa=document.getElementById('selAll'); if(sa) sa.indeterminate=some;
-  renderOverlays();
-}
+      `; }
 
 function renderOverlays(){
   let h='';
+  if(ui.drawer){
+    h+=`<div class="scrim d" data-act="closeDrawer"></div>
+    <aside class="drawer" role="dialog" aria-modal="true" aria-label="Collections">
+      <header><h2>Collections</h2><button class="x" data-act="closeDrawer" aria-label="Close collections">&#10005;</button></header>
+      <div class="dbody">${sideInner()}</div>
+    </aside>`;
+  }
   if(ui.tray){
     const changed=draft!==filter;
     h+=`<div class="scrim" data-act="closeTray"></div>
@@ -322,7 +463,7 @@ function renderOverlays(){
       body=`<p>You\u2019re about to publish ${plural(caps,'caption')}.</p>
         <p>Want to check them first? <button class="linkbtn" data-act="reviewCaptions" data-id="${items[0].id}">Review captions</button></p>`;
     } else {
-      body=`<p>You\u2019re about to publish ${plural(caps,'caption')} across ${plural(elig.length,'media item')}.</p>`;
+      body=`<p>You\u2019re about to publish captions for ${plural(elig.length,'media item')}.</p>`;
     }
     h+=`<div class="scrim m" data-act="closeModal"></div>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt">
@@ -348,7 +489,7 @@ function openMenuAt(btn,html){
   el.style.left=left+'px'; el.style.top=top+'px';
 }
 function renderMenus(){
-  if(ui.modal||ui.tray) return;
+  if(ui.modal||ui.tray||ui.drawer) return;
   if(ui.bulkMenu){
     const sel=[...selected].map(id=>media.find(m=>m.id===id));
     const can=sel.some(m=>unpubN(m)>0);
@@ -387,6 +528,10 @@ document.addEventListener('click',e=>{
   if(t.closest('#resetBtn')) return resetAll();
   if(t.closest('#filterBtn')){ draft=filter; ui.tray=true; ui.bulkMenu=false; ui.rowMenu=null; return renderOverlaysOnly(); }
   if(t.closest('#bulkBtn')){ ui.bulkMenu=!ui.bulkMenu; ui.rowMenu=null; return renderOverlaysOnly(); }
+  const pg=t.closest('[data-page]');
+  if(pg){ if(pg.disabled||pg.hasAttribute('aria-current')) return; page=+pg.dataset.page; ui.bulkMenu=ui.rowMenu=null; render(); const c=document.querySelector('.crumb'); if(c) c.scrollIntoView({block:'start'}); return; }
+  const sb=t.closest('[data-sort]');
+  if(sb){ const k=sb.dataset.sort; sort=sort.key===k?{key:k,dir:sort.dir==='asc'?'desc':'asc'}:{key:k,dir:k==='title'?'asc':'desc'}; page=1; ui.bulkMenu=ui.rowMenu=null; return render(); }
   const rowBtn=t.closest('[data-row]');
   if(rowBtn){ const id=+rowBtn.dataset.row; ui.rowMenu=ui.rowMenu===id?null:id; ui.bulkMenu=false; return renderOverlaysOnly(); }
 
@@ -396,9 +541,13 @@ document.addEventListener('click',e=>{
     switch(act){
       case 'noop': ui.bulkMenu=ui.rowMenu=null; break;
       case 'closeTray': ui.tray=false; break;
+      case 'openDrawer': ui.drawer=true; ui.bulkMenu=ui.rowMenu=null; break;
+      case 'closeDrawer': ui.drawer=false; break;
       case 'trayReset': draft='all'; break;
-      case 'applyFilter': filter=draft; ui.tray=false; selected.clear(); return render();
-      case 'clearFilter': filter='all'; selected.clear(); return render();
+      case 'applyFilter': filter=draft; page=1; ui.tray=false; selected.clear(); return render();
+      case 'clearFilter': filter='all'; page=1; selected.clear(); return render();
+      case 'selectAllResults': visible().forEach(m=>selected.add(m.id)); return render();
+      case 'clearSelection': selected.clear(); ui.bulkMenu=false; return render();
       case 'deselectAll': selected.clear(); ui.bulkMenu=false; return render();
       case 'bulkPublish': ui.modal={mode:'bulk',ids:[...selected]}; ui.bulkMenu=false; break;
       case 'rowPublish': ui.modal={mode:'row',ids:[+a.dataset.id]}; ui.rowMenu=null; break;
@@ -416,33 +565,39 @@ document.addEventListener('change',e=>{
   const t=e.target;
   if(t.id==='capSel'){ draft=t.value; return renderOverlaysOnly(); }
   if(t.id==='stateToggle'){ showState=t.checked; return render(); }
-  if(t.id==='selAll'){
-    const rows=visible(); selected=t.checked?new Set(rows.map(m=>m.id)):new Set();
+  if(t.id==='mobSort'){ const [k,d]=t.value.split(':'); sort={key:k,dir:d}; page=1; ui.bulkMenu=false; return render(); }
+  if(t.id==='selAll'||t.id==='selAllM'){
+    view().rows.forEach(m=>{ t.checked?selected.add(m.id):selected.delete(m.id); });
     ui.bulkMenu=false; return render();
   }
   if(t.dataset.id && t.type==='checkbox'){
-    const id=+t.dataset.id; t.checked?selected.add(id):selected.delete(id);
+    const id=+t.dataset.id;
+    const {total:tot,rows:pr}=view();
+    if(!t.checked && selected.size===tot && tot>PAGE){
+      // leaving "All X results selected": keep only the other items on the current page
+      selected=new Set(pr.map(m=>m.id).filter(x=>x!==id));
+    } else { t.checked?selected.add(id):selected.delete(id); }
     ui.bulkMenu=false; return render();
   }
 });
 
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  if(ui.modal) ui.modal=null; else if(ui.tray) ui.tray=false; else ui.bulkMenu=ui.rowMenu=null;
+  if(ui.modal) ui.modal=null; else if(ui.tray) ui.tray=false; else if(ui.drawer) ui.drawer=false; else ui.bulkMenu=ui.rowMenu=null;
   renderOverlaysOnly();
 });
 
 function renderOverlaysOnly(){ document.getElementById('overlays').innerHTML=''; renderOverlays(); }
 
 function confirmPublish(){
-  const ids=new Set(ui.modal.ids); let n=0;
-  media.forEach(m=>{ if(ids.has(m.id)) m.caps.forEach(c=>{ if(c.status===U){ c.status=P; n++; } }); });
+  const ids=new Set(ui.modal.ids); let n=0, items=0; const bulk=ui.modal.mode==='bulk';
+  media.forEach(m=>{ if(ids.has(m.id)){ const before=n; m.caps.forEach(c=>{ if(c.status===U){ c.status=P; n++; } }); if(n>before) items++; } });
   ui.modal=null; selected.clear();
   render();
-  toast(`${plural(n,'caption')} published.`);
+  toast(bulk?`Captions published for ${plural(items,'media item')}.`:`${plural(n,'caption')} published.`);
 }
 
 resetAll();
 </script>
-
-</body></html>
+</body>
+</html>
